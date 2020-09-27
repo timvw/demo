@@ -7,8 +7,10 @@ import (
 
 func headers(w http.ResponseWriter, req *http.Request) {
 
+	fmt.Println("received a request: ")
 	for name, headers := range req.Header {
 		for _, h := range headers {
+			fmt.Println("%v: %v\n", name, h)
 			fmt.Fprintf(w, "%v: %v\n", name, h)
 		}
 	}

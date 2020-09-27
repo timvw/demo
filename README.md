@@ -10,3 +10,9 @@ kubectl create deployment demo --image=timvw/demo
 kubectl expose deployment demo --port=80
 kubectl apply -f ingress.yaml
 ```
+
+```
+docker build -t timvw/demo . 
+docker push timvw/demo:latest
+kubectl rollout restart deployment/demo
+```
