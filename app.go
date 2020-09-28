@@ -1,30 +1,37 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
-func headers(w http.ResponseWriter, req *http.Request) {
+type GithubMessage struct {
+	Ref string `json:"ref"`
+	Repository struct {
+		SshURL string `json:"ssh_url"`
+	} `json:"repository"`
+}
 
-	fmt.Println("received a request: ")
-	for name, headers := range req.Header {
-		for _, h := range headers {
-			fmt.Println("%v: %v\n", name, h)
-			fmt.Fprintf(w, "%v: %v\n", name, h)
-		}
+func Github(w http.ResponseWriter, r *http.Request) {
+
+	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
+
+	fmt.Println("need to handle a request...")
+	var payload GithubMessage
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&payload)
+	if err != nil {
+		fmt.Printf("failed to decode %s\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	user := "tim"
-	fmt.Fprintf(w, "my name is %v", user)
+	fmt.Printf("ref: %v\n", payload.Ref)
+	fmt.Printf("sshurl: %v\n", payload.Repository.SshURL)
+	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
-
-	fmt.Println("Server is starting..")
-
-	//http.HandleFunc("/hello", hello)
-	http.HandleFunc("/headers", headers)
-
+	http.HandleFunc("/github", Github)
 	http.ListenAndServe(":80", nil)
 }
